@@ -11,16 +11,18 @@ Usage:
 Arguments:
 
 Options:
-    --verbose               lots of logging
-    --record                record the x,y,z movement to a .csv file
-    --help                  you're looking at it
-    --sampleWindowSec       When monitoring, the number of seconds in which to look for the downward arm movement (default 5)
-    --approxXHighPosition   approximate position (in G of the X axis) of the arm in the UP (load) position (default 0.4)
-    --approxXLowPosition    approximate position (in G of the X axis) of the arm in the DOWN (brew) position (default 0)
+    --verbose                       lots of logging
+    --record                        record the x,y,z movement to a .csv file
+    --help                          you're looking at it
+    --sampleWindowSec=<swc>         When monitoring, the number of seconds in which to look for the downward arm movement [default: 5]
+    --approxXHighPosition=<xhigh>   approximate position (in G of the X axis) of the arm in the UP (load) position [default: 0.50]
+    --approxXLowPosition=<xlow>     approximate position (in G of the X axis) of the arm in the DOWN (brew) position [default: 0.03]
+    --XPositionDelta=<delta>        fudge factor (in G) to use when looking for the X high and low positions [default: 0.1]
 """
 
 import struct
 import time
+import numpy as np
 from docopt import docopt
 import MPU6050
 import pytz
@@ -77,6 +79,7 @@ mpu6050.enableFifoAccelOnly(True)
 mpu6050.setSampleRate(samplesPerSecond)
 
 cli = docopt(__doc__)
+print cli
 
 
 def logIt(message):
@@ -162,80 +165,54 @@ def record():
 ##
 def monitor():
     print 'monitoring...'
-    sampleWindowSec = cli.get('--sampleWindowSec', 20)
-    armHighG = cli.get('--approxXHighPosition', 0.75)
-    armLowG = cli.get('--approxXLowPosition', 0.0)
-    print('sampleWindowSec:{0} armHighG:{1} armLowG:{2}'.format(
-        samplesPerSecond, armHighG, armLowG))
+    armHighG = cli.get('--approxXHighPosition', 0.50)
+    armLowG = cli.get('--approxXLowPosition', 0.03)
+    positionDelta = cli.get('--XPositionDelta', 0.1)
+    print('sampleWindowSec:{0} armHighG:{1} armLowG:{2}, XPositionDelta:{3}'.format(
+        samplesPerSecond, armHighG, armLowG, positionDelta))
 
+    lastXPos = 0
     while True:
-        bytesAvailable = mpu6050.readFifoCount()
-        logIt('bytes available {0}'.format(bytesAvailable))
-
-        if bytesAvailable < sampleWindowSec * samplesPerSecond * bytesPerSample:
-            logIt('need more samples')
-            time.sleep(0.1)
-            continue
-
-        if bytesAvailable % bytesPerSample != 0:
-            print('continuing because buffer contains a partial sample, bytesAvailable : {0}'.format(
-                bytesAvailable))
-            continue
-
-        status = mpu6050.readStatus()
-
-        if status & 0b00010000:
-            print "OVERFLOW!!!!! something bad happened, attempting to recover"
-
-            mpu6050.enableFifo(False)
-            time.sleep(0.5)
-            mpu6050.resetFifo()
-            time.sleep(0.5)
-            mpu6050.enableFifoAccelOnly(True)
-            continue
-
         sampleBytes = []
         xSamples = []
-
-        logIt('now processing {0} bytes'.format(bytesAvailable))
-
-        # read the bytes into an array
-        newByteCount = bytesAvailable
+        bytesAvailable = mpu6050.readFifoCount()
+        saveBytesAvail = bytesAvailable
         while bytesAvailable > 0:
-            bytesToRead = int(batchSizeBytes) if bytesAvailable > int(
-                batchSizeBytes) else bytesAvailable
+            bytesToRead = int(batchSizeBytes) if bytesAvailable > int(batchSizeBytes) else bytesAvailable
             sampleBytes.extend(mpu6050.readNFromFifo(bytesToRead))
             bytesAvailable -= bytesToRead
 
-        # turn the bytes into samples
-        newSampleCount = newByteCount / bytesPerSample
-        for sampleCount in range(0, newSampleCount):
+        logIt('Just read {0} bytes'.format(saveBytesAvail))
+        newSampleCount = len(sampleBytes) / bytesPerSample
+        for sampleCount in range(0, newSampleCount - 1):
             start = sampleCount * bytesPerSample
             end = start + bytesPerSample
             sample = sampleBytes[start:end]
             rawX = struct.unpack(">h", buffer(bytearray(sample[0:2])))[0]
-            #rawY = struct.unpack(">h", buffer(bytearray(sample[2:4])))[0]
-            #rawZ = struct.unpack(">h", buffer(bytearray(sample[4:6])))[0]
-
             # convert raw values to real gravity numbers
             gravX = rawX * accelValueToGConversion
-            #gravY = rawY * accelValueToGConversion
-            #gravZ = rawZ * accelValueToGConversion
-            xSamples.extend([{'g': gravX, 'index': sampleCount}])
+            xSamples.extend([gravX])
 
-        logIt('we have {0} x samples'.format(len(xSamples)))
+        # take average x position
+        newXPos = np.average(np.array(xSamples))
+        logIt('new x pos {0}'.format(newXPos))
+        if (lastXPos - positionDelta) <= newXPos  <= (lastXPos + positionDelta):
+            logIt('arm has not moved')
+        else:
+            logIt('arm is in new position')
+            if (armLowG - positionDelta) <= newXPos <= (armLowG + positionDelta):
+                print 'arm has moved DOWN'
+            elif (armHighG - positionDelta) <= newXPos <= (armHighG + positionDelta):
+                print 'arm has moved UP'
+            else:
+                print 'error, arm is in an unknown position {0}'.format(newXPos)
 
-        # now sort the xSamples and compare the high / low
-        sortedX = sorted(xSamples, key=lambda x: x['g'])
-        lowX = sortedX[0]
-        highX = sortedX[-1]
-        logIt('low x: {0:10.10f}, high x:{1:10.10f}'.format(
-            lowX['g'], highX['g']))
+        lastXPos = newXPos
 
-        if abs(highX['g'] - lowX['g']) >= abs(armHighG - armLowG) and highX['index'] < lowX['index']:
-            print "ARM LOWERED!!"
-        elif abs(highX['g'] - lowX['g']) >= abs(armHighG - armLowG) and highX['index'] > lowX['index']:
-            print "ARM RAISED!!!"
+        time.sleep(1)
+
+
+
 
 
 if cli['--record']:
