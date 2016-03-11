@@ -19,17 +19,13 @@ Options:
     --approxXLowPosition    approximate position (in G of the X axis) of the arm in the DOWN (brew) position (default 0)
 """
 
+import struct
+import time
+from docopt import docopt
+import MPU6050
+import pytz
 __author__ = 'cp@cjparker.us'
 
-import MPU6050
-from docopt import docopt
-import math
-import time
-import numpy
-import struct
-import requests
-import datetime
-import pytz
 
 tz = pytz.timezone("America/Denver")
 
@@ -85,7 +81,7 @@ cli = docopt(__doc__)
 
 def logIt(message):
     if cli['--verbose']:
-        print(message)
+        print message
 
 
 def record():
@@ -106,7 +102,7 @@ def record():
             continue
 
         if bytesAvailable % bytesPerSample != 0:
-            print('continuing because buffer contains a partial sample')
+            print 'continuing because buffer contains a partial sample'
             continue
 
         else:
@@ -115,7 +111,7 @@ def record():
             status = mpu6050.readStatus()
 
             if status & 0b00010000:
-                print("OVERFLOW!!!!! something bad happened")
+                print "OVERFLOW!!!!! something bad happened"
                 exit(1)
 
             # while there are bytes available to be read, get em
@@ -133,7 +129,7 @@ def record():
             newSampleCount = newByteCounter / bytesPerSample
             logIt('new samples to print {0}'.format(newSampleCount))
             if newByteCounter % bytesPerSample != 0:
-                print('PANIC!!, we read a partial sample!!!')
+                print 'PANIC!!, we read a partial sample!!!'
 
             # we just read some samples into the sample accum array
             # now dump the samples we just collected to a csv file
@@ -165,9 +161,9 @@ def record():
 # TODO: figure out the exact sample rate1
 ##
 def monitor():
-    print('monitoring...')
+    print 'monitoring...'
     sampleWindowSec = cli.get('--sampleWindowSec', 20)
-    armHighG = cli.get('--approxXHighPosition', 0.4)
+    armHighG = cli.get('--approxXHighPosition', 0.75)
     armLowG = cli.get('--approxXLowPosition', 0.0)
     print('sampleWindowSec:{0} armHighG:{1} armLowG:{2}'.format(
         samplesPerSecond, armHighG, armLowG))
@@ -189,7 +185,7 @@ def monitor():
         status = mpu6050.readStatus()
 
         if status & 0b00010000:
-            print("OVERFLOW!!!!! something bad happened, attempting to recover")
+            print "OVERFLOW!!!!! something bad happened, attempting to recover"
 
             mpu6050.enableFifo(False)
             time.sleep(0.5)
@@ -218,13 +214,13 @@ def monitor():
             end = start + bytesPerSample
             sample = sampleBytes[start:end]
             rawX = struct.unpack(">h", buffer(bytearray(sample[0:2])))[0]
-            rawY = struct.unpack(">h", buffer(bytearray(sample[2:4])))[0]
-            rawZ = struct.unpack(">h", buffer(bytearray(sample[4:6])))[0]
+            #rawY = struct.unpack(">h", buffer(bytearray(sample[2:4])))[0]
+            #rawZ = struct.unpack(">h", buffer(bytearray(sample[4:6])))[0]
 
             # convert raw values to real gravity numbers
             gravX = rawX * accelValueToGConversion
-            gravY = rawY * accelValueToGConversion
-            gravZ = rawZ * accelValueToGConversion
+            #gravY = rawY * accelValueToGConversion
+            #gravZ = rawZ * accelValueToGConversion
             xSamples.extend([{'g': gravX, 'index': sampleCount}])
 
         logIt('we have {0} x samples'.format(len(xSamples)))
@@ -237,9 +233,9 @@ def monitor():
             lowX['g'], highX['g']))
 
         if abs(highX['g'] - lowX['g']) >= abs(armHighG - armLowG) and highX['index'] < lowX['index']:
-            print("ARM LOWERED!!")
+            print "ARM LOWERED!!"
         elif abs(highX['g'] - lowX['g']) >= abs(armHighG - armLowG) and highX['index'] > lowX['index']:
-            print("ARM RAISED!!!")
+            print "ARM RAISED!!!"
 
 
 if cli['--record']:
