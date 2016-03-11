@@ -162,6 +162,8 @@ def record():
             samplePrintIndex += newSampleCount * bytesPerSample
 
 
+# TODO: figure out the exact sample rate1
+##
 def monitor():
     print('monitoring...')
     sampleWindowSec = cli.get('--sampleWindowSec', 20)
