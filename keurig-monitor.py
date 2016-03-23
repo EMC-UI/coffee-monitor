@@ -26,8 +26,11 @@ import numpy as np
 from docopt import docopt
 import MPU6050
 import pytz
+import datetime
+import json
 __author__ = 'cp@cjparker.us'
 
+dataFilePath = '/opt/coffee-monitor/data.json'
 
 tz = pytz.timezone("America/Denver")
 
@@ -171,6 +174,9 @@ def monitor():
     print('sampleWindowSec:{0} armHighG:{1} armLowG:{2}, XPositionDelta:{3}'.format(
         samplesPerSecond, armHighG, armLowG, positionDelta))
 
+    # open the data file
+    dataFile = open(dataFilePath, 'a')
+
     lastXPos = 0
     while True:
         sampleBytes = []
@@ -178,15 +184,15 @@ def monitor():
         bytesAvailable = mpu6050.readFifoCount()
 
         if bytesAvailable <= 0:
-           time.sleep(1)
-           continue
+            time.sleep(1)
+            continue
 
         saveBytesAvail = bytesAvailable
         while bytesAvailable > 0:
-            bytesToRead = int(batchSizeBytes) if bytesAvailable > int(batchSizeBytes) else bytesAvailable
+            bytesToRead = int(batchSizeBytes) if bytesAvailable > int(
+                batchSizeBytes) else bytesAvailable
             sampleBytes.extend(mpu6050.readNFromFifo(bytesToRead))
             bytesAvailable -= bytesToRead
-
 
         logIt('Just read {0} bytes'.format(saveBytesAvail))
         newSampleCount = len(sampleBytes) / bytesPerSample
@@ -202,23 +208,32 @@ def monitor():
         # take average x position
         newXPos = np.average(np.array(xSamples))
         logIt('new x pos {0}'.format(newXPos))
-        if (lastXPos - positionDelta) <= newXPos  <= (lastXPos + positionDelta):
+        if (lastXPos - positionDelta) <= newXPos <= (lastXPos + positionDelta):
             logIt('arm has not moved')
         else:
             logIt('arm is in new position')
             if (armLowG - positionDelta) <= newXPos <= (armLowG + positionDelta):
                 print 'arm has moved DOWN'
+                rec = {
+                    'dateTime': datetime.datetime.now(tz).strftime('%Y-%m-%dT%H:%M:%S%z'),
+                    'action' : 'DOWN'
+                }
+                json.dump(rec, dataFile)
+                dataFile.flush()
             elif (armHighG - positionDelta) <= newXPos <= (armHighG + positionDelta):
                 print 'arm has moved UP'
+                rec = {
+                    'dateTime': datetime.datetime.now(tz).strftime('%Y-%m-%dT%H:%M:%S%z'),
+                    'action' : 'UP'
+                }
+                json.dump(rec, dataFile)
+                dataFile.flush()
             else:
                 print 'error, arm is in an unknown position {0}'.format(newXPos)
 
         lastXPos = newXPos
 
         time.sleep(1)
-
-
-
 
 
 if cli['--record']:
