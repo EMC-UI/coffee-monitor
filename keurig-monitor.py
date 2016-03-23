@@ -176,11 +176,17 @@ def monitor():
         sampleBytes = []
         xSamples = []
         bytesAvailable = mpu6050.readFifoCount()
+
+        if bytesAvailable <= 0:
+           time.sleep(1)
+           continue
+
         saveBytesAvail = bytesAvailable
         while bytesAvailable > 0:
             bytesToRead = int(batchSizeBytes) if bytesAvailable > int(batchSizeBytes) else bytesAvailable
             sampleBytes.extend(mpu6050.readNFromFifo(bytesToRead))
             bytesAvailable -= bytesToRead
+
 
         logIt('Just read {0} bytes'.format(saveBytesAvail))
         newSampleCount = len(sampleBytes) / bytesPerSample
