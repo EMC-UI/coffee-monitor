@@ -219,6 +219,7 @@ def monitor():
                     'action' : 'DOWN'
                 }
                 json.dump(rec, dataFile)
+                dataFile.write(',\n')
                 dataFile.flush()
             elif (armHighG - positionDelta) <= newXPos <= (armHighG + positionDelta):
                 print 'arm has moved UP'
@@ -227,6 +228,7 @@ def monitor():
                     'action' : 'UP'
                 }
                 json.dump(rec, dataFile)
+                dataFile.write(',\n')
                 dataFile.flush()
             else:
                 print 'error, arm is in an unknown position {0}'.format(newXPos)
