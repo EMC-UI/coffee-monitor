@@ -46,3 +46,29 @@ mongorestore coffee-dump-mongo
 
 The DB name is `coffee` and the collection name is also `coffee`
 
+## Example Analysis
+As of Friday, May 27, 2016, here is our coffee consumption by hour:
+
+```
+[ { '09': 300 },
+  { '08': 265 },
+  { '10': 188 },
+  { '14': 116 },
+  { '11': 111 },
+  { '13': 92 },
+  { '15': 86 },
+  { '12': 72 },
+  { '16': 54 },
+  { '07': 31 },
+  { '17': 17 },
+  { '18': 7 },
+  { '23': 2 },
+  { '20': 2 },
+  { '05': 1 },
+  { '00': 1 },
+  { '06': 1 },
+  { '04': 1 },
+  { '03': 1 },
+  { '19': 1 } ]
+```
+  
