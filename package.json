@@ -1,0 +1,25 @@
+{
+  "name": "coffee-monitor",
+  "version": "1.0.0",
+  "description": "Imports coffee data json file into mongodb",
+  "main": "importData.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/EMC-UI/coffee-monitor.git"
+  },
+  "author": "",
+  "license": "ISC",
+  "bugs": {
+    "url": "https://github.com/EMC-UI/coffee-monitor/issues"
+  },
+  "homepage": "https://github.com/EMC-UI/coffee-monitor#readme",
+  "dependencies": {
+    "asyncawait": "^1.0.3",
+    "moment": "^2.13.0",
+    "promised-mongo": "^1.2.0",
+    "underscore": "^1.8.3"
+  }
+}
