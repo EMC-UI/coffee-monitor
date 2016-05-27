@@ -36,3 +36,13 @@ The JSON data looks like this:
     }
 ]
 ```
+
+## MongoDB data
+There is a mongo DB dump included in this repo.  To import it into mongo:
+
+```
+mongorestore coffee-dump-mongo
+```
+
+The DB name is `coffee` and the collection name is also `coffee`
+
