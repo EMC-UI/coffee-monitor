@@ -3,6 +3,16 @@
 <head>
   <meta charset="utf-8">
   <title>CoffeeMonitor</title>
+
+  <style>
+    body {
+      font-family: helvetica,arial, san-serif;
+      font-size: 16px;
+      display: flex;
+      color: tan;
+      background-repeat: repeat;
+      background-image: url("http://www.afloor.co.uk/media/catalog/product/cache/1/image/1200x1200/9df78eab33525d08d6e5fb8d27136e95/c/o/coffee_t2784.jpg")}
+  </style>
   <base href="/">
 
   {{#unless environment.production}}
@@ -12,8 +22,9 @@
   <link rel="icon" type="image/x-icon" href="favicon.ico">
 </head>
 <body>
+
   <app-root>Loading...</app-root>
-  
+
     {{#each scripts.polyfills}}
     <script src="{{.}}"></script>
     {{/each}}
@@ -22,6 +33,6 @@
         System.import('main');
       }).catch(console.error.bind(console));
     </script>
-  
+
 </body>
 </html>

@@ -31,11 +31,11 @@ class BlackMagic {
     }
 
     getStart() {
-        return this.getCollection().find({}).sort('dateTime',-1);
+        return this.getCollection().find({action:'DOWN'}).sort({dateTime:-1}).limit(1).then(result => moment(result[0].dateTime).format("dddd, MMMM Do YYYY"));
     }
 
     getEnd() {
-        return this.getCollection().find({}).sort('dateTime',1);
+        return this.getCollection().find({action:'DOWN'}).sort({dateTime:1}).limit(1).then(result => moment(result[0].dateTime).format("dddd, MMMM Do YYYY"));
     }
 
     fillHours(results) {
@@ -44,7 +44,6 @@ class BlackMagic {
         var found = results.find((res) => {
           return (num === res._id.hourOfDay);
         });
-        console.log('found?: ', found);
         if (!found) {
           return {
             _id: {
@@ -57,12 +56,20 @@ class BlackMagic {
         }
       });
       return filled.map((result) => {
-        result.hourOfDay = result._id.hourOfDay;
-        console.log('mapping', result);
-        result.label = moment().hour(result.hourOfDay).minute(0).format('hh:mm a');
-        console.log('result: ', result);
+        result.hour = result._id.hourOfDay;
+        result.label = moment().hour(result.hour).minute(0).format('hh:mm a');
+        delete result._id;
         return result;
       });
+    }
+
+    fixDays(results) {
+      return results.map((result) => {
+        result.day = result._id.dayOfWeek;
+        result.label = moment().day(result.day-1).format('dddd');
+        delete result._id;
+        return result;
+      })
     }
 
     getCountByHour() {
@@ -72,7 +79,7 @@ class BlackMagic {
                 _id : { hourOfDay: { $hour: '$dateTime'} },
                 count: { $sum: 1 }
             }},
-            {$sort: { _id : 1}}
+            {$sort: { _id : -1}}
         ).then(this.fillHours);
     }
 
@@ -84,7 +91,7 @@ class BlackMagic {
                 count: { $sum: 1 }
             }},
             {$sort: { _id: 1}}
-        );
+        ).then(this.fixDays);
     }
 
 }

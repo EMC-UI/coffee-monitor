@@ -1,3 +1,30 @@
-<h1>
-  {{title}}
-</h1>
+<article>
+
+  <h1>Coffee Popularity <em>- North Break Room</em></h1>
+  <small>from {{start}} to {{end}}</small>
+
+  <h3>By Day of the Week</h3>
+
+  <div class="chart">
+    <div *ngFor="let day of days" class="row">
+      <label>{{day.label}}</label>
+      <span class="container">
+        <span class="bar" [style.width.%]="day.percentage * 2"><span>{{day.count}}</span></span>
+      </span>
+    </div>
+  </div>
+
+  <h3>Coffee By Hour of the Day</h3>
+
+  <div class="chart">
+    <div *ngFor="let hour of hours" class="row">
+      <label>{{hour.label}}</label>
+      <span class="container">
+      <span class="bar" [style.width.%]="hour.percentage * 2"><span>{{hour.count}}</span></span>
+    </span>
+    </div>
+  </div>
+
+</article>
+
+
