@@ -1,0 +1,128 @@
+[
+  {
+    "_id": {
+      "hourOfDay": 0
+    },
+    "count": 2
+  },
+  {
+    "_id": {
+      "hourOfDay": 2
+    },
+    "count": 3
+  },
+  {
+    "_id": {
+      "hourOfDay": 3
+    },
+    "count": 1
+  },
+  {
+    "_id": {
+      "hourOfDay": 4
+    },
+    "count": 1
+  },
+  {
+    "_id": {
+      "hourOfDay": 5
+    },
+    "count": 1
+  },
+  {
+    "_id": {
+      "hourOfDay": 6
+    },
+    "count": 1
+  },
+  {
+    "_id": {
+      "hourOfDay": 7
+    },
+    "count": 45
+  },
+  {
+    "_id": {
+      "hourOfDay": 8
+    },
+    "count": 331
+  },
+  {
+    "_id": {
+      "hourOfDay": 9
+    },
+    "count": 397
+  },
+  {
+    "_id": {
+      "hourOfDay": 10
+    },
+    "count": 229
+  },
+  {
+    "_id": {
+      "hourOfDay": 11
+    },
+    "count": 131
+  },
+  {
+    "_id": {
+      "hourOfDay": 12
+    },
+    "count": 90
+  },
+  {
+    "_id": {
+      "hourOfDay": 13
+    },
+    "count": 102
+  },
+  {
+    "_id": {
+      "hourOfDay": 14
+    },
+    "count": 161
+  },
+  {
+    "_id": {
+      "hourOfDay": 15
+    },
+    "count": 112
+  },
+  {
+    "_id": {
+      "hourOfDay": 16
+    },
+    "count": 71
+  },
+  {
+    "_id": {
+      "hourOfDay": 17
+    },
+    "count": 20
+  },
+  {
+    "_id": {
+      "hourOfDay": 18
+    },
+    "count": 8
+  },
+  {
+    "_id": {
+      "hourOfDay": 19
+    },
+    "count": 2
+  },
+  {
+    "_id": {
+      "hourOfDay": 20
+    },
+    "count": 4
+  },
+  {
+    "_id": {
+      "hourOfDay": 23
+    },
+    "count": 2
+  }
+]

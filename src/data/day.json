@@ -1,0 +1,44 @@
+[
+  {
+    "_id": {
+      "dayOfWeek": 1
+    },
+    "count": 4
+  },
+  {
+    "_id": {
+      "dayOfWeek": 2
+    },
+    "count": 358
+  },
+  {
+    "_id": {
+      "dayOfWeek": 3
+    },
+    "count": 347
+  },
+  {
+    "_id": {
+      "dayOfWeek": 4
+    },
+    "count": 258
+  },
+  {
+    "_id": {
+      "dayOfWeek": 5
+    },
+    "count": 413
+  },
+  {
+    "_id": {
+      "dayOfWeek": 6
+    },
+    "count": 330
+  },
+  {
+    "_id": {
+      "dayOfWeek": 7
+    },
+    "count": 4
+  }
+]

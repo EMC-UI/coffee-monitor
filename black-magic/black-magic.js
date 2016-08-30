@@ -6,6 +6,7 @@
 const pm = require('promised-mongo');
 const collection = 'coffee';
 let db = pm('mongodb://localhost/coffee');
+const moment = require('moment');
 
 
 class BlackMagic {
@@ -37,6 +38,33 @@ class BlackMagic {
         return this.getCollection().find({}).sort('dateTime',1);
     }
 
+    fillHours(results) {
+      var fill = [...Array(24).keys()];
+      var filled = fill.map((num) => {
+        var found = results.find((res) => {
+          return (num === res._id.hourOfDay);
+        });
+        console.log('found?: ', found);
+        if (!found) {
+          return {
+            _id: {
+              hourOfDay:num,
+            },
+            count: 0
+          }
+        } else {
+          return found;
+        }
+      });
+      return filled.map((result) => {
+        result.hourOfDay = result._id.hourOfDay;
+        console.log('mapping', result);
+        result.label = moment().hour(result.hourOfDay).minute(0).format('hh:mm a');
+        console.log('result: ', result);
+        return result;
+      });
+    }
+
     getCountByHour() {
         return this.getCollection().aggregate(
             {$match: {action: 'DOWN'}},
@@ -45,7 +73,7 @@ class BlackMagic {
                 count: { $sum: 1 }
             }},
             {$sort: { _id : 1}}
-        );
+        ).then(this.fillHours);
     }
 
     getCountByDay() {
