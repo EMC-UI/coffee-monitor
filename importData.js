@@ -17,7 +17,7 @@ let doIt = Async(() => {
   let data = JSON.parse(fs.readFileSync('data.json','utf-8'))
   _.each(data, record => {
     var realDate = moment(record.dateTime)
-    record.dateTime = realDate.toDate()
+    record.dateTime = realDate.subtract(6, 'hours').toDate()
 
     let result = Await(db.collection('coffee').insert(record)
       .then(() => {
