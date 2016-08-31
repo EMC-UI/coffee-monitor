@@ -108,3 +108,18 @@ As of Friday, May 27, 2016, here is our coffee consumption by hour:
   { '03': 1 },
   { '19': 1 } ]
 ```
+
+
+# Black Magic - putting a UI on the coffee data.
+
+## Another way to get the munged data into the db
+tar -xvf coffee-db.tar
+mongorestore
+
+## Run the rest server
+node black-magic/index.js
+
+## Run the UI ( requires angular-cli installed )
+ng serve
+
+## Open browser to http://localhost:4200
